@@ -28,27 +28,9 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 
 		public Rental(int units, RentalType rentalType, int preparationTimeInDays) : this()
 		{
-			_units = units;
-			_rentalType = rentalType;
-			_preparationTimeInDays = preparationTimeInDays;
-		}
-
-		public bool IsAvailableBookingRequest(DateTime start, int nights)
-		{
-			var count = GetTotalUnitsOccupied(start, nights);
-
-			return count < Units;
-		}
-
-		private int GetTotalUnitsOccupied(DateTime start, int nights)
-		{
-			var count = 0;
-			for (var i = 0; i < nights; i++)
-			{
-				count = _bookings.Count(booking => booking.IsExistingBookingInConflictWithBookingRequest(start, nights));
-			}
-
-			return count;
+			_units = units > 0 ? units : throw new ArgumentException(nameof(units));
+			_rentalType = rentalType ?? RentalType.Room;
+			_preparationTimeInDays = preparationTimeInDays >= 0 ? preparationTimeInDays : throw new ArgumentException(nameof(preparationTimeInDays));
 		}
 
 		public Booking AddBooking(int rentalId, int nights, DateTime date)
@@ -82,6 +64,24 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 			}
 
 			return calendar;
+		}
+
+		private bool IsAvailableBookingRequest(DateTime start, int nights)
+		{
+			var count = GetTotalUnitsOccupied(start, nights);
+
+			return count < Units;
+		}
+
+		private int GetTotalUnitsOccupied(DateTime start, int nights)
+		{
+			var count = 0;
+			for (var i = 0; i < nights; i++)
+			{
+				count = _bookings.Count(booking => booking.IsExistingBookingInConflictWithBookingRequest(start, nights));
+			}
+
+			return count;
 		}
 
 		private List<int> GetPreparationDaysUnits(DateTime startDate)

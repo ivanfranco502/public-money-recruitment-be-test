@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices.ComTypes;
+﻿using System;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 {
@@ -10,8 +11,8 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 
 		public BookingUnit(int id, int unit)
 		{
-			Id = id;
-			Unit = unit;
+			Id = id > 0 ? id: throw new ArgumentException(nameof(id));
+			Unit = unit > 0 ? unit :throw new ArgumentException(nameof(unit));
 		}
 	}
 }

@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using VacationRental.Api.Commands;
 using VacationRental.Api.Models;
 
 namespace VacationRental.Api.Controllers
 {
-    [Route("api/v1/bookings")]
+	[Route("api/v1/bookings")]
     [ApiController]
     public class BookingsController : ControllerBase
     {

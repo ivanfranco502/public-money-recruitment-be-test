@@ -40,7 +40,7 @@ namespace VacationRental.FunctionalTests
             {
                  RentalId = postRentalResult.Id,
                  Nights = 3,
-                 Start = new DateTime(2001, 01, 01)
+                 Start = DateTime.Today
             };
 
             ResourceIdViewModel postBookingResult;
@@ -81,7 +81,7 @@ namespace VacationRental.FunctionalTests
             {
                 RentalId = postRentalResult.Id,
                 Nights = 3,
-                Start = new DateTime(2002, 01, 01)
+                Start = DateTime.Today
             };
 
             using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
@@ -93,7 +93,7 @@ namespace VacationRental.FunctionalTests
             {
                 RentalId = postRentalResult.Id,
                 Nights = 1,
-                Start = new DateTime(2002, 01, 02)
+                Start = DateTime.Today.AddDays(1)
             };
 
             await Assert.ThrowsAsync<BookingDomainException>(async () =>
@@ -124,7 +124,7 @@ namespace VacationRental.FunctionalTests
 			{
 				RentalId = postRentalResult.Id,
 				Nights = 1,
-				Start = new DateTime(2002, 01, 01)
+				Start = DateTime.Today
 			};
 
 			using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
@@ -136,7 +136,7 @@ namespace VacationRental.FunctionalTests
 			{
 				RentalId = postRentalResult.Id,
 				Nights = 1,
-				Start = new DateTime(2002, 01, 04)
+				Start = DateTime.Today.AddDays(3)
 			};
 
 			await Assert.ThrowsAsync<BookingDomainException>(async () =>

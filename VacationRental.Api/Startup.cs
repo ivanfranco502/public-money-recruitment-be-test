@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,8 +31,8 @@ namespace VacationRental.Api
 				.AddDbContextConfiguration(Configuration)
 				.AddMediatorConfiguration(Configuration)
 				.AddRepositoryConfiguration(Configuration)
-				.AddValidatorConfiguration(Configuration)
 				.AddMediatR(typeof(Startup).GetTypeInfo().Assembly)
+				.AddMediatR(typeof(IValidator<>))
 				.AddMediatR(typeof(IRequestHandler<,>))
 				.AddMediatR(typeof(IRequest<>))
 				.AddMediatR(typeof(INotificationHandler<>));

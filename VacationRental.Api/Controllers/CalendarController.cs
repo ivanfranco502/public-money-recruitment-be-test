@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using VacationRental.Api.Commands;
 using VacationRental.Api.Models;
 
 namespace VacationRental.Api.Controllers
 {
-    [Route("api/v1/calendar")]
+	[Route("api/v1/calendar")]
     [ApiController]
     public class CalendarController : ControllerBase
     {
 		private readonly IMediator _mediator;
-		private readonly ILogger<RentalsController> _logger;
+		private readonly ILogger<CalendarController> _logger;
 
         public CalendarController(
 			IMediator mediator,
-			ILogger<RentalsController> logger)
+			ILogger<CalendarController> logger)
         {
 			_mediator = mediator;
 			_logger = logger;

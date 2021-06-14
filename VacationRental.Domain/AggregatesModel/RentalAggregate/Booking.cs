@@ -23,11 +23,13 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 
 		public Booking(int rentalId, int nights, int preparationDays, DateTime start, int unit)
 		{
-			_preparationDays = preparationDays;
-			_rentalId = rentalId;
-			_nights = nights;
-			_start = start;
-			_unit = unit;
+			_preparationDays = preparationDays >= 0
+				? preparationDays
+				: throw new ArgumentException(nameof(preparationDays));
+			_rentalId = rentalId > 0 ? rentalId : throw new ArgumentException(nameof(rentalId));
+			_nights = nights > 0 ? nights : throw new ArgumentException(nameof(nights));
+			_start = start >= DateTime.Today ? start : throw new ArgumentException(nameof(start));
+			_unit = unit > 0 ? unit : throw new ArgumentException(nameof(unit));
 		}
 
 		public bool IsExistingBookingInConflictWithBookingRequest(in DateTime start, int nights)
