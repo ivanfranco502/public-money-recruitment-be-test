@@ -1,20 +1,23 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using VacationRental.Api;
 using VacationRental.Api.Models;
-using VacationRental.FunctionalTests.Helpers;
+using VacationRental.Domain.Exceptions;
 using Xunit;
 
 namespace VacationRental.FunctionalTests
 {
-    [Collection("Integration")]
-    public class PostBookingTests
+	public class PostBookingTests: IDisposable
     {
         private readonly HttpClient _client;
 
-        public PostBookingTests(IntegrationFixture fixture)
-        {
-            _client = fixture.Client;
+		public PostBookingTests()
+		{
+			var _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+			_client = _server.CreateClient();
         }
 
         [Fact]
@@ -55,7 +58,7 @@ namespace VacationRental.FunctionalTests
                 Assert.Equal(postBookingRequest.Nights, getBookingResult.Nights);
                 Assert.Equal(postBookingRequest.Start, getBookingResult.Start);
             }
-        }
+		}
 
         [Fact]
         public async Task GivenCompleteRequest_WhenPostBooking_ThenAPostReturnsErrorWhenThereIsOverbooking()
@@ -91,12 +94,17 @@ namespace VacationRental.FunctionalTests
                 Start = new DateTime(2002, 01, 02)
             };
 
-            await Assert.ThrowsAsync<ApplicationException>(async () =>
+            await Assert.ThrowsAsync<BookingDomainException>(async () =>
             {
                 using (var postBooking2Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking2Request))
                 {
                 }
             });
         }
-    }
+
+		public void Dispose()
+		{
+			_client?.Dispose();
+		}
+	}
 }

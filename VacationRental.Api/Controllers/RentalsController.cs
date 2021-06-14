@@ -23,32 +23,26 @@ namespace VacationRental.Api.Controllers
 			_logger = logger;
 		}
 
-        [HttpGet]
-        [Route("{rentalId:int}")]
-        public async Task<RentalViewModel> Get(int rentalId)
+		[HttpGet]
+		[Route("{rentalId:int}")]
+		public async Task<RentalViewModel> Get(int rentalId)
 		{
-			var rental = default(RentalViewModel);
+			var getRentalCommand = new GetRentalCommand(rentalId);
 
-			if (rentalId > 0)
-			{
-				var getRentalCommand = new GetRentalCommand(rentalId);
-
-				rental = await _mediator.Send(getRentalCommand);
-			}
+			RentalViewModel rental = await _mediator.Send(getRentalCommand);
 
 			if (rental == default(RentalViewModel))
-                throw new ApplicationException("Rental not found");
+				throw new ApplicationException("Rental not found");
 
-            return rental;
-        }
+			return rental;
+		}
 
-        [HttpPost]
-        public ResourceIdViewModel Post(RentalBindingModel model)
+		[HttpPost]
+        public async Task<ResourceIdViewModel> Post(RentalBindingModel model)
 		{
-			var createdRental = default(ResourceIdViewModel);
+			var createRentalCommand = new CreateRentalCommand(model.Units, model.PreparationTimeInDays);
+			var createdRental = await _mediator.Send(createRentalCommand);
 
-			var createRentalCommand = new CreateRentalCommand(model.Units);
-            
 			if (createdRental == default(ResourceIdViewModel))
 				throw new ApplicationException("Rental was not created");
 

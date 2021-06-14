@@ -7,7 +7,7 @@ namespace VacationRental.Api.Validations
 	{
 		public GetRentalCommandValidator()
 		{
-			RuleFor(command => command.RentalId).GreaterThan(0);
+			RuleFor(command => command.RentalId).GreaterThan(0).WithMessage("Rental not found");
 		}
 	}
 }

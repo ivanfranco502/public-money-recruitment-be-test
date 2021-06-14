@@ -1,20 +1,22 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using VacationRental.Api;
 using VacationRental.Api.Models;
-using VacationRental.FunctionalTests.Helpers;
 using Xunit;
 
 namespace VacationRental.FunctionalTests
 {
-    [Collection("Integration")]
-    public class GetCalendarTests
+	public class GetCalendarTests:IDisposable
     {
         private readonly HttpClient _client;
 
-        public GetCalendarTests(IntegrationFixture fixture)
+        public GetCalendarTests()
         {
-            _client = fixture.Client;
+			var _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+			_client = _server.CreateClient();
         }
 
         [Fact]
@@ -89,5 +91,10 @@ namespace VacationRental.FunctionalTests
                 Assert.Empty(getCalendarResult.Dates[4].Bookings);
             }
         }
-    }
+
+		public void Dispose()
+		{
+			_client?.Dispose();
+		}
+	}
 }

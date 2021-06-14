@@ -6,9 +6,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage;
-using VacationRental.Domain.AggregatesModel.BookingAggregate;
 using VacationRental.Domain.AggregatesModel.RentalAggregate;
 using VacationRental.Domain.SeedWork;
+using VacationRental.Infrastructure.EntityConfigurations;
 
 namespace VacationRental.Infrastructure
 {
@@ -38,14 +38,10 @@ namespace VacationRental.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.ApplyConfiguration(new ClientRequestEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new PaymentMethodEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new OrderItemEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new CardTypeEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new OrderStatusEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new BuyerEntityTypeConfiguration());
-        }
+            modelBuilder.ApplyConfiguration(new RentalEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BookingEntityTypeConfiguration());
+			modelBuilder.ApplyConfiguration(new RentalTypeEntityTypeConfiguration());
+		}
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -61,7 +57,7 @@ namespace VacationRental.Infrastructure
             // performed through the DbContext will be committed
             var result = await base.SaveChangesAsync();
 
-            return true;
+            return result != 0;
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

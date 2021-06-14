@@ -1,43 +1,52 @@
-﻿using System.Net.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using VacationRental.Api;
 using VacationRental.Api.Models;
-using VacationRental.FunctionalTests.Helpers;
 using Xunit;
 
 namespace VacationRental.FunctionalTests
 {
-    [Collection("Integration")]
-    public class PostRentalTests
-    {
-        private readonly HttpClient _client;
+	public class PostRentalTests : IDisposable
+	{
+		private readonly HttpClient _client;
 
-        public PostRentalTests(IntegrationFixture fixture)
-        {
-            _client = fixture.Client;
-        }
+		public PostRentalTests()
+		{
+			var _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+			_client = _server.CreateClient();
+		}
 
-        [Fact]
-        public async Task GivenCompleteRequest_WhenPostRental_ThenAGetReturnsTheCreatedRental()
-        {
-            var request = new RentalBindingModel
-            {
-                Units = 25
-            };
+		[Fact]
+		public async Task GivenCompleteRequest_WhenPostRental_ThenAGetReturnsTheCreatedRental()
+		{
+			var request = new RentalBindingModel
+			{
+				Units = 25,
+				PreparationTimeInDays = 2
+			};
 
-            ResourceIdViewModel postResult;
-            using (var postResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", request))
-            {
-                Assert.True(postResponse.IsSuccessStatusCode);
-                postResult = await postResponse.Content.ReadAsAsync<ResourceIdViewModel>();
-            }
+			ResourceIdViewModel postResult;
+			using (var postResponse = await _client.PostAsJsonAsync($"/api/v1/rentals", request))
+			{
+				Assert.True(postResponse.IsSuccessStatusCode);
+				postResult = await postResponse.Content.ReadAsAsync<ResourceIdViewModel>();
+			}
 
-            using (var getResponse = await _client.GetAsync($"/api/v1/rentals/{postResult.Id}"))
-            {
-                Assert.True(getResponse.IsSuccessStatusCode);
+			using (var getResponse = await _client.GetAsync($"/api/v1/rentals/{postResult.Id}"))
+			{
+				Assert.True(getResponse.IsSuccessStatusCode);
 
-                var getResult = await getResponse.Content.ReadAsAsync<RentalViewModel>();
-                Assert.Equal(request.Units, getResult.Units);
-            }
-        }
-    }
+				var getResult = await getResponse.Content.ReadAsAsync<RentalViewModel>();
+				Assert.Equal(request.Units, getResult.Units);
+			}
+		}
+
+		public void Dispose()
+		{
+			_client?.Dispose();
+		}
+	}
 }

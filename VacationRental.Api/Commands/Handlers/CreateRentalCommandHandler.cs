@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using VacationRental.Api.Models;
 using VacationRental.Domain.AggregatesModel.RentalAggregate;
+using VacationRental.Domain.Exceptions;
 
 namespace VacationRental.Api.Commands
 {
@@ -30,8 +31,10 @@ namespace VacationRental.Api.Commands
 
 			var rentalPersisted = await _rentalRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
 
-			
+			if(!rentalPersisted)
+				throw new RentalDomainException("The rental was not created");
 
+			return new ResourceIdViewModel(rental.Id);
 		}
 	}
 }

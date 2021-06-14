@@ -10,5 +10,7 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		Rental Add(Rental rental);
 
 		void Update(Rental rental);
+
+		Task<Booking> GetBookingAsync(int bookingId);
 	}
 }

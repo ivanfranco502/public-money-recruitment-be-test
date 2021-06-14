@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using VacationRental.Api.Commands;
 using VacationRental.Api.Validations;
-using VacationRental.Domain.AggregatesModel.BookingAggregate;
 using VacationRental.Domain.AggregatesModel.RentalAggregate;
 using VacationRental.Infrastructure;
 using VacationRental.Infrastructure.Repositories;
@@ -15,17 +14,6 @@ namespace VacationRental.Api.Modules
 {
 	public static class ApplicationModule
 	{
-		public static IServiceCollection AddDbContextConfiguration(this IServiceCollection services,
-			IConfiguration configuration)
-		{
-			services.AddEntityFrameworkInMemoryDatabase()
-				.AddDbContext<VacationRentalContext>(
-					opt => { opt.UseInMemoryDatabase(databaseName: "VacationRental"); },
-					ServiceLifetime.Scoped);
-
-			return services;
-		}
-
 		public static IServiceCollection AddSwaggerConfiguration(this IServiceCollection services,
 			IConfiguration configuration)
 		{
@@ -38,6 +26,18 @@ namespace VacationRental.Api.Modules
 			return services;
 		}
 
+		public static IServiceCollection AddDbContextConfiguration(this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			services.AddEntityFrameworkInMemoryDatabase()
+				.AddDbContext<VacationRentalContext>(
+					opt => { opt.UseInMemoryDatabase(databaseName: "VacationRental"); },
+					ServiceLifetime.Scoped);
+
+			return services;
+		}
+
+
 		public static IServiceCollection AddMediatorConfiguration(this IServiceCollection services,
 			IConfiguration configuration)
 		{
@@ -49,8 +49,7 @@ namespace VacationRental.Api.Modules
 		public static IServiceCollection AddRepositoryConfiguration(this IServiceCollection services,
 			IConfiguration configuration)
 		{
-			services.AddScoped<IBookingRepository, BookingRepository>()
-				.AddScoped<IRentalRepository, RentalRepository>();
+			services.AddScoped<IRentalRepository, RentalRepository>();
 
 			return services;
 		}
@@ -59,7 +58,10 @@ namespace VacationRental.Api.Modules
 			IConfiguration configuration)
 		{
 			services.AddScoped<IValidator<GetRentalCommand>, GetRentalCommandValidator>()
-				.AddScoped<IValidator<CreateRentalCommand>, CreateRentalCommandValidator>();
+				.AddScoped<IValidator<CreateRentalCommand>, CreateRentalCommandValidator>()
+				.AddScoped<IValidator<GetBookingCommand>, GetBookingCommandValidator>()
+				.AddScoped<IValidator<CreateBookingCommand>, CreateBookingCommandValidator>()
+				.AddScoped<IValidator<GetCalendarCommand>, GetCalendarCommandValidator>(); ;
 
 			return services;
 		}

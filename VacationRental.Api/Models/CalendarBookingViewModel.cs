@@ -2,6 +2,11 @@
 {
     public class CalendarBookingViewModel
     {
-        public int Id { get; set; }
-    }
+		public int Id { get; set; }
+
+		public CalendarBookingViewModel(int bookingId)
+		{
+			Id = bookingId;
+		}
+	}
 }

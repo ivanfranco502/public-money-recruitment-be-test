@@ -1,10 +1,13 @@
-﻿using MediatR;
+﻿using System.Reflection;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VacationRental.Api.Modules;
+using VacationRental.Infrastructure;
 
 namespace VacationRental.Api
 {
@@ -23,12 +26,14 @@ namespace VacationRental.Api
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
 			services
-				.AddDbContextConfiguration(Configuration)
 				.AddSwaggerConfiguration(Configuration)
+				.AddDbContextConfiguration(Configuration)
 				.AddMediatorConfiguration(Configuration)
 				.AddRepositoryConfiguration(Configuration)
 				.AddValidatorConfiguration(Configuration)
+				.AddMediatR(typeof(Startup).GetTypeInfo().Assembly)
 				.AddMediatR(typeof(IRequestHandler<,>))
+				.AddMediatR(typeof(IRequest<>))
 				.AddMediatR(typeof(INotificationHandler<>));
 		}
 
