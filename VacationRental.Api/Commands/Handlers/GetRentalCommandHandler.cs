@@ -28,7 +28,7 @@ namespace VacationRental.Api.Commands
 			if (rentalToBeFound == default(Rental))
 				throw new RentalDomainException("Rental not found");
 
-			return new RentalViewModel(rentalToBeFound.Units);
+			return new RentalViewModel(rentalToBeFound.Units, rentalToBeFound.PreparationTimeInDays);
 		}
 	}
 }

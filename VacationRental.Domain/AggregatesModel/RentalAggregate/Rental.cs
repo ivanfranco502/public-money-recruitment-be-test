@@ -35,20 +35,28 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 
 		public bool IsAvailableBookingRequest(DateTime start, int nights)
 		{
-			var count = 0;
-			for (var i = 0; i < nights; i++)
-			{
-				count = _bookings.Count(booking => booking.IsBookingRequestInConflict(start, nights));
-			}
+			var count = GetTotalUnitsOccupied(start, nights);
 
 			return count < Units;
 		}
 
+		private int GetTotalUnitsOccupied(DateTime start, int nights)
+		{
+			var count = 0;
+			for (var i = 0; i < nights; i++)
+			{
+				count = _bookings.Count(booking => booking.IsExistingBookingInConflictWithBookingRequest(start, nights));
+			}
+
+			return count;
+		}
+
 		public Booking AddBooking(int rentalId, int nights, DateTime date)
 		{
-			if (IsAvailableBookingRequest(date, nights))
+			var totalDurationUnavailable = nights + PreparationTimeInDays;
+			if (IsAvailableBookingRequest(date, totalDurationUnavailable))
 			{
-				var booking = new Booking(rentalId, nights, date);
+				var booking = new Booking(rentalId, nights, PreparationTimeInDays, date, GetTotalUnitsOccupied(date, totalDurationUnavailable) + 1);
 
 				_bookings.Add(booking);
 
@@ -64,11 +72,11 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		public BookingCalendar GetCalendar(DateTime start, int nights)
 		{
 			var calendar = new BookingCalendar(Id);
-			for (var i = 0; i < nights; i++)
+			for (var i = 0; i < nights + PreparationTimeInDays; i++)
 			{
 				var dateTime = start.AddDays(i).Date;
 				var calendarByDate =
-					new BookingCalendarDate(dateTime, GetBookingIdsByDate(dateTime));
+					new BookingCalendarDate(dateTime, GetBookingIdsByDate(dateTime), GetPreparationDaysUnits(dateTime));
 
 				calendar.AddCalendarDate(calendarByDate);
 			}
@@ -76,9 +84,15 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 			return calendar;
 		}
 
-		private List<int> GetBookingIdsByDate(DateTime startDate)
+		private List<int> GetPreparationDaysUnits(DateTime startDate)
 		{
-			return _bookings.Where(b => b.IsBookedFor(startDate)).Select(filtered => filtered.Id).ToList();
+			return _bookings.Where(b => b.IsUnavailable(startDate) && !b.IsBookedFor(startDate))
+				.Select(filtered => filtered.Unit).ToList();
+		}
+
+		private List<BookingUnit> GetBookingIdsByDate(DateTime startDate)
+		{
+			return _bookings.Where(b => b.IsBookedFor(startDate)).Select(filtered => new BookingUnit(filtered.Id, filtered.Unit)).ToList();
 		}
 	}
 }

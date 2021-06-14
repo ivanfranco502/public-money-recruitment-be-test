@@ -13,10 +13,11 @@ namespace VacationRental.Infrastructure.EntityConfigurations
 
 			bookingConfiguration.Ignore(b => b.DomainEvents);
 
-			//Address value object persisted as owned entity type supported since EF Core 2.0
 			bookingConfiguration.Property<int>("RentalId").IsRequired();
 			bookingConfiguration.Property<int>("Nights").IsRequired();
 			bookingConfiguration.Property<DateTime>("Start").IsRequired();
+			bookingConfiguration.Property<int>("Unit").IsRequired();
+			bookingConfiguration.Property<int>("PreparationDays").IsRequired();
 		}
 	}
 }

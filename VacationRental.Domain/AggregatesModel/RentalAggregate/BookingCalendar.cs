@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace VacationRental.Domain.AggregatesModel.RentalAggregate
@@ -22,24 +21,6 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		public void AddCalendarDate(BookingCalendarDate calendarByDate)
 		{
 			_dates.Add(calendarByDate);
-		}
-	}
-
-	public class BookingCalendarDate
-	{
-		public DateTime Date { get; }
-
-		public IReadOnlyCollection<int> Bookings { get; }
-
-		protected BookingCalendarDate()
-		{
-			Bookings = new List<int>();
-		}
-
-		public BookingCalendarDate(DateTime date, List<int> bookings): this()
-		{
-			Date = date;
-			Bookings = bookings;
 		}
 	}
 }
