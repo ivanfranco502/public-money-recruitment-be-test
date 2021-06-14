@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using VacationRental.Domain.AggregatesModel.RentalAggregate;
 
 namespace VacationRental.Api.Models
 {
@@ -6,5 +10,18 @@ namespace VacationRental.Api.Models
     {
         public int RentalId { get; set; }
         public List<CalendarDateViewModel> Dates { get; set; }
+
+		public CalendarViewModel()
+		{
+			Dates = new List<CalendarDateViewModel>();
+		}
+
+		public CalendarViewModel(int rentalId, IEnumerable<BookingCalendarDate> bookingCalendarDates)
+		{
+			RentalId = rentalId;
+			Dates = bookingCalendarDates != null
+				? bookingCalendarDates.Select(bcd => new CalendarDateViewModel(bcd.Date, bcd.Bookings, bcd.PreparationTimes)).ToList()
+				: new List<CalendarDateViewModel>();
+		}
     }
 }

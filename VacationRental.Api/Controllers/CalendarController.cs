@@ -1,59 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using VacationRental.Api.Commands;
 using VacationRental.Api.Models;
 
 namespace VacationRental.Api.Controllers
 {
-    [Route("api/v1/calendar")]
+	[Route("api/v1/calendar")]
     [ApiController]
     public class CalendarController : ControllerBase
     {
-        private readonly IDictionary<int, RentalViewModel> _rentals;
-        private readonly IDictionary<int, BookingViewModel> _bookings;
+		private readonly IMediator _mediator;
+		private readonly ILogger<CalendarController> _logger;
 
         public CalendarController(
-            IDictionary<int, RentalViewModel> rentals,
-            IDictionary<int, BookingViewModel> bookings)
+			IMediator mediator,
+			ILogger<CalendarController> logger)
         {
-            _rentals = rentals;
-            _bookings = bookings;
+			_mediator = mediator;
+			_logger = logger;
         }
 
         [HttpGet]
-        public CalendarViewModel Get(int rentalId, DateTime start, int nights)
+        public async Task<CalendarViewModel> Get(int rentalId, DateTime start, int nights)
         {
-            if (nights < 0)
-                throw new ApplicationException("Nights must be positive");
-            if (!_rentals.ContainsKey(rentalId))
-                throw new ApplicationException("Rental not found");
+			var getCalendarCommand = new GetCalendarCommand(rentalId, start, nights);
 
-            var result = new CalendarViewModel 
-            {
-                RentalId = rentalId,
-                Dates = new List<CalendarDateViewModel>() 
-            };
-            for (var i = 0; i < nights; i++)
-            {
-                var date = new CalendarDateViewModel
-                {
-                    Date = start.Date.AddDays(i),
-                    Bookings = new List<CalendarBookingViewModel>()
-                };
+			CalendarViewModel calendar = await _mediator.Send(getCalendarCommand);
 
-                foreach (var booking in _bookings.Values)
-                {
-                    if (booking.RentalId == rentalId
-                        && booking.Start <= date.Date && booking.Start.AddDays(booking.Nights) > date.Date)
-                    {
-                        date.Bookings.Add(new CalendarBookingViewModel { Id = booking.Id });
-                    }
-                }
+			if (calendar == default(CalendarViewModel))
+				throw new ApplicationException("Calendar not found");
 
-                result.Dates.Add(date);
-            }
-
-            return result;
-        }
+			return calendar;
+		}
     }
 }
