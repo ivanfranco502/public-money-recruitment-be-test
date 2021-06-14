@@ -33,6 +33,34 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 			_preparationTimeInDays = preparationTimeInDays >= 0 ? preparationTimeInDays : throw new ArgumentException(nameof(preparationTimeInDays));
 		}
 
+		protected Rental CloneInstanceWithNewValues(int units, int preparationTimeInDays, IReadOnlyCollection<Booking> bookings)
+		{
+			var clone = new Rental(units, this.RentalType, preparationTimeInDays) {Id = Id};
+			foreach (var booking in bookings)
+			{
+				clone._bookings.Add(booking);
+			}
+			return clone;
+		}
+
+		private void UpdateBooking(int bookingId, bool update = false)
+		{
+			var bookingToUpdate = _bookings.FirstOrDefault(b => b.Id == bookingId);
+			if (bookingToUpdate == default(Booking))
+				throw new BookingDomainException("Booking not found");
+
+			var totalDurationUnavailable = bookingToUpdate.Nights + PreparationTimeInDays;
+			if (IsAvailableBookingRequest(bookingToUpdate.Start, totalDurationUnavailable, update))
+			{
+				bookingToUpdate.UpdatePreparationTime(PreparationTimeInDays);
+			}
+			else
+			{
+				throw new BookingDomainException(
+					"The booking is not possible to be updated. There is no availability.");
+			}
+		}
+
 		public Booking AddBooking(int rentalId, int nights, DateTime date)
 		{
 			var totalDurationUnavailable = nights + PreparationTimeInDays;
@@ -66,19 +94,19 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 			return calendar;
 		}
 
-		private bool IsAvailableBookingRequest(DateTime start, int nights)
+		private bool IsAvailableBookingRequest(DateTime start, int nights, bool update = false)
 		{
-			var count = GetTotalUnitsOccupied(start, nights);
+			var count = GetTotalUnitsOccupied(start, nights, update);
 
 			return count < Units;
 		}
 
-		private int GetTotalUnitsOccupied(DateTime start, int nights)
+		private int GetTotalUnitsOccupied(DateTime start, int nights, bool update = false)
 		{
 			var count = 0;
 			for (var i = 0; i < nights; i++)
 			{
-				count = _bookings.Count(booking => booking.IsExistingBookingInConflictWithBookingRequest(start, nights));
+				count = _bookings.Count(booking => booking.IsExistingBookingInConflictWithBookingRequest(start, nights, booking.Id, update));
 			}
 
 			return count;
@@ -93,6 +121,17 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		private List<BookingUnit> GetBookingIdsByDate(DateTime startDate)
 		{
 			return _bookings.Where(b => b.IsBookedFor(startDate)).Select(filtered => new BookingUnit(filtered.Id, filtered.Unit)).ToList();
+		}
+
+		public void ApplyUpdate(int units, int preparationTimeInDays, bool updateId = true)
+		{
+			_units = units;
+			_preparationTimeInDays = preparationTimeInDays;
+
+			foreach (var booking in _bookings)
+			{
+				UpdateBooking(booking.Id, updateId);
+			}
 		}
 	}
 }

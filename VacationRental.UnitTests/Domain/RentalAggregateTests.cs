@@ -108,5 +108,46 @@ namespace VacationRental.UnitTests.Domain
 			Assert.Throws<BookingDomainException>(() => rental.AddBooking(1, 3, DateTime.Today.AddDays(3)));
 			Assert.Single(rental.Bookings);
 		}
+
+		[Fact]
+		public void GivenARentalPreparationTimeUpdateWithoutConflict_WhenVerifyRentalUpdate_ThenShouldRunWithoutError()
+		{
+			var rental = new Rental(1, RentalType.Room, 2);
+			rental.AddBooking(1, 2, DateTime.Today);
+			rental.AddBooking(1, 2, DateTime.Today.AddDays(4));
+
+			rental.ApplyUpdate(1, 1);
+		}
+
+		[Fact]
+		public void GivenARentalPreparationTimeUpdateWithConflict_WhenVerifyRentalUpdate_ThenShouldThrowError()
+		{
+			var rental = new Rental(1, RentalType.Room, 1);
+			rental.AddBooking(1, 2, DateTime.Today);
+			rental.AddBooking(1, 2, DateTime.Today.AddDays(3));
+
+
+			Assert.Throws<BookingDomainException>(() => rental.ApplyUpdate(1, 2, false));
+		}
+
+		[Fact]
+		public void GivenARentalUnitUpdateWithoutConflict_WhenVerifyRentalUpdate_ThenShouldRunWithoutError()
+		{
+			var rental = new Rental(2, RentalType.Room, 1);
+			rental.AddBooking(1, 2, DateTime.Today);
+			rental.AddBooking(1, 2, DateTime.Today);
+
+			rental.ApplyUpdate(3, 1, false);
+		}
+
+		[Fact]
+		public void GivenARentalUnitUpdateWithConflict_WhenVerifyRentalUpdate_ThenShouldThrowError()
+		{
+			var rental = new Rental(2, RentalType.Room, 1);
+			rental.AddBooking(1, 2, DateTime.Today);
+			rental.AddBooking(1, 2, DateTime.Today);
+
+			Assert.Throws<BookingDomainException>(() => rental.ApplyUpdate(1, 2, false));
+		}
 	}
 }

@@ -129,5 +129,58 @@ namespace VacationRental.UnitTests.Application.Controllers
 			}
 		}
 
+		[Fact]
+		public async Task GivenAValidRentalBindingModel_WhenPut_ThenShouldReturnUpdated()
+		{
+			var rentalBindingModel = new RentalBindingModel { PreparationTimeInDays = 3, Units = 1 };
+
+			_mediator.Setup(m => m.Send(It.IsAny<UpdateRentalCommand>(), It.IsAny<CancellationToken>()))
+				.ReturnsAsync(new ResourceIdViewModel(7));
+
+			var rentalsController = new RentalsController(_mediator.Object, _logger.Object);
+			rentalsController.ControllerContext.HttpContext = _context.Object;
+
+			var response = await rentalsController.Put(1, rentalBindingModel);
+
+			_mediator.Verify(
+				m => m.Send(
+					It.Is<UpdateRentalCommand>(crc => crc.Units == 1 && crc.PreparationTimeInDays == 3),
+					It.IsAny<CancellationToken>()),
+				Times.Once);
+
+			Assert.NotNull(response);
+			Assert.Equal(7, response.Id);
+		}
+
+		[Fact]
+		public async Task GivenAnInValidRentalBindingModel_WhenPut_ThenShouldReturnError()
+		{
+			try
+			{
+				var rentalBindingModel = new RentalBindingModel { PreparationTimeInDays = 3, Units = 1 };
+
+				_mediator.Setup(m => m.Send(It.IsAny<UpdateRentalCommand>(), It.IsAny<CancellationToken>()))
+					.ReturnsAsync(default(ResourceIdViewModel));
+
+				var rentalsController = new RentalsController(_mediator.Object, _logger.Object);
+				rentalsController.ControllerContext.HttpContext = _context.Object;
+
+				var response = await rentalsController.Post(rentalBindingModel);
+
+				_mediator.Verify(
+					m => m.Send(
+						It.Is<UpdateRentalCommand>(crc => crc.Units == 1 && crc.PreparationTimeInDays == 3),
+						It.IsAny<CancellationToken>()),
+					Times.Once);
+
+				throw new XunitException();
+			}
+			catch (Exception ex)
+			{
+				Assert.IsType<ApplicationException>(ex);
+			}
+		}
+
+
 	}
 }

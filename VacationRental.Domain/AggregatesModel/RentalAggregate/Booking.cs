@@ -9,7 +9,7 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		private int _nights;
 		private DateTime _start;
 		private int _unit;
-		private readonly int _preparationDays;
+		private int _preparationDays;
 
 		public int RentalId => _rentalId;
 
@@ -20,6 +20,11 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		public int Unit => _unit;
 
 		public int PreparationDays => _preparationDays;
+
+		protected Booking()
+		{
+			
+		}
 
 		public Booking(int rentalId, int nights, int preparationDays, DateTime start, int unit)
 		{
@@ -32,11 +37,13 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 			_unit = unit > 0 ? unit : throw new ArgumentException(nameof(unit));
 		}
 
-		public bool IsExistingBookingInConflictWithBookingRequest(in DateTime start, int nights)
+		public bool IsExistingBookingInConflictWithBookingRequest(in DateTime start, int nights, int id, bool update = false)
 		{
-			return Start <= start.Date && Start.AddDays(Nights + PreparationDays) > start.Date 
-					|| Start < start.AddDays(nights) && Start.AddDays(Nights + PreparationDays) >= start.AddDays(nights)
-					|| Start > start && Start.AddDays(Nights + PreparationDays) < start.AddDays(nights);
+			var boolLogic = Start <= start.Date && Start.AddDays(Nights + PreparationDays) > start.Date
+							|| Start < start.AddDays(nights) && Start.AddDays(Nights + PreparationDays) >= start.AddDays(nights)
+							|| Start > start && Start.AddDays(Nights + PreparationDays) < start.AddDays(nights);
+			
+			return update ? boolLogic && id != Id : boolLogic;
 		}
 
 		public bool IsBookedFor(DateTime startDate)
@@ -47,6 +54,11 @@ namespace VacationRental.Domain.AggregatesModel.RentalAggregate
 		public bool IsUnavailable(DateTime startDate)
 		{
 			return Start <= startDate && Start.AddDays(Nights + PreparationDays) > startDate;
+		}
+
+		public void UpdatePreparationTime(int preparationTimeInDays)
+		{
+			_preparationDays = preparationTimeInDays;
 		}
 	}
 }

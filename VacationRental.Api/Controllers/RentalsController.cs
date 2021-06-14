@@ -48,5 +48,18 @@ namespace VacationRental.Api.Controllers
 
 			return createdRental;
 		}
+
+		[HttpPut]
+		[Route("{rentalId:int}")]
+		public async Task<ResourceIdViewModel> Put(int rentalId, RentalBindingModel model)
+		{
+			var updateRentalCommand = new UpdateRentalCommand(rentalId, model.Units, model.PreparationTimeInDays);
+			var updatedRental = await _mediator.Send(updateRentalCommand);
+
+			if (updatedRental == default(ResourceIdViewModel))
+				throw new ApplicationException("Rental was not updated");
+
+			return updatedRental;
+		}
     }
 }
